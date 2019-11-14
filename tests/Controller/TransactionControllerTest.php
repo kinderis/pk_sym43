@@ -7,7 +7,7 @@ use Symfony\Component\BrowserKit\Tests\TestClient;
 
 class TransactionControllerTest extends WebTestCase
 {
-    public function testShowPost()
+    public function testCreateTransaction()
     {
 
         $client = new TestClient();
