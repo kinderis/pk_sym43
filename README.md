@@ -29,10 +29,6 @@ Generate the SSH keys:
 * openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
 * openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
 
-Copy configuration security.yaml.example from root dir into config/packages/ and rename security.yaml
-
-Configure the SSH keys path in your config/packages/lexik_jwt_authentication.yaml
-
 Detail configuring [LexikJWTAuthenticationBundle][4]
 
 Default authorization credentials:
