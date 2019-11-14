@@ -7,8 +7,8 @@
 * [Install this project][1] with Composer.
 * Do ``git clone https://github.com/kinderis/pk_sym43.git`` or download project from this [repociroty][2]
 * When cloning is done - enter project's directory with ``cd pk_sym43``
-* Install dependencies with ``composer install``
 * Copy `.env.test` file as `.env.local`. Edit newly copied `.env.local` file and fill it with proper configuration options. You can read more on .env files [at symfony docs][3].
+* Install dependencies with ``composer install``
 * Edit database connection information in .env file.
 * Create DB schema ``./c doctrine:database:create``
 * Run database migrations with ``./c doctrine:migrations:migrate``
