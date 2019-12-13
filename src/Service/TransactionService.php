@@ -171,7 +171,6 @@ class TransactionService
             'currency' => $result->getCurrency()->getName(),
             'fee' => number_format((float)($result->getAmount()/100), 2, '.', ''),
             'status' => $status,
-            'statusCode' => Response::HTTP_OK
         ];
     }
 }

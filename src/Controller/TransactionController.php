@@ -30,7 +30,7 @@ class TransactionController extends AbstractController
     }
 
     /**
-     * @Route("/api/createTransaction", methods={"POST","HEAD"})
+     * @Route("/api/createTransaction", methods={"POST"})
      * @return Response
      */
 
@@ -56,7 +56,7 @@ class TransactionController extends AbstractController
     }
 
     /**
-     * @Route("/api/authorizeTransaction", methods={"POST","HEAD"})
+     * @Route("/api/authorizeTransaction", methods={"POST"})
      * @return Response
      */
 
