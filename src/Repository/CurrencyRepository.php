@@ -48,11 +48,11 @@ class CurrencyRepository extends ServiceEntityRepository
     }
     */
 
-    public function findCurrencyByName($value): ?Currency
+    public function findCurrencyByName($currencyName): ?Currency
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.name = :val')
-            ->setParameter('val', strtoupper($value))
+            ->andWhere('c.name = :name')
+            ->setParameter('name', strtoupper($currencyName))
             ->getQuery()
             ->getOneOrNullResult()
             ;

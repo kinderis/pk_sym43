@@ -31,22 +31,17 @@ class TransactionController extends AbstractController
 
     /**
      * @Route("/api/createTransaction", methods={"POST","HEAD"})
+     * @return Response
      */
 
-    public function createTransaction ( Request $request )
+    public function createTransaction (Request $request)
     {
         $token = $this->tokenStorage->getToken();
         /** @var WebUser $user */
         $user = $token->getUser();
 
-        $response = $this->transactionService->startTransaction( $user, $request );
+        $response = $this->transactionService->startTransaction($user, $request);
 
-        if ( $response['statusCode'] != Response::HTTP_OK ){
-            $serializedEntity = $this->container->get('serializer')->serialize($response, 'json');
-            return new Response($serializedEntity, $response['statusCode'], ['Content-Type' => 'application/json']);
-        }
-
-        unset($response['statusCode']);
         $encoders = [new JsonEncoder()];
         $normalizers = [new ObjectNormalizer()];
         $serializer = new Serializer($normalizers, $encoders);
@@ -62,23 +57,18 @@ class TransactionController extends AbstractController
 
     /**
      * @Route("/api/authorizeTransaction", methods={"POST","HEAD"})
+     * @return Response
      */
 
-    public function authorizeTransaction ( Request $request )
+    public function authorizeTransaction (Request $request)
     {
         $token = $this->tokenStorage->getToken();
         /** @var WebUser $user */
         $user = $token->getUser();
 
-        $response = $this->transactionService->authorizeTransaction( $user, $request );
+        $response = $this->transactionService->authorizeTransaction($user, $request);
 
-        if ( $response['statusCode'] != Response::HTTP_OK ){
-            $serializedEntity = $this->container->get('serializer')->serialize($response, 'json');
-            return new Response($serializedEntity, $response['statusCode'], ['Content-Type' => 'application/json']);
-        } else {
-            unset($response['statusCode']);
-            $serializedEntity = $this->container->get('serializer')->serialize($response, 'json');
-            return new Response($serializedEntity, Response::HTTP_OK, ['Content-Type' => 'application/json']);
-        }
+        $serializedEntity = $this->container->get('serializer')->serialize($response, 'json');
+        return new Response($serializedEntity, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 }
