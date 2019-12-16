@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation AS JMS;
 
@@ -103,6 +105,22 @@ class Transaction
      * @JMS\Expose()
      */
     private $providerResponse;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\TransactionStatus", inversedBy="status")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $status;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\TwoFactor", mappedBy="transaction")
+     */
+    private $transaction;
+
+    public function __construct()
+    {
+        $this->transaction = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -273,6 +291,49 @@ class Transaction
     public function setProviderResponse(?string $providerResponse): self
     {
         $this->providerResponse = $providerResponse;
+
+        return $this;
+    }
+
+    public function getStatus(): ?TransactionStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?TransactionStatus $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TwoFactor[]
+     */
+    public function getTransaction(): Collection
+    {
+        return $this->transaction;
+    }
+
+    public function addTransactionId(TwoFactor $transaction): self
+    {
+        if (!$this->transaction->contains($transaction)) {
+            $this->transaction[] = $transaction;
+            $transaction->setTransaction($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransaction(TwoFactor $transaction): self
+    {
+        if ($this->transaction->contains($transaction)) {
+            $this->transaction->removeElement($transaction);
+            // set the owning side to null (unless already changed)
+            if ($transaction->getTransaction() === $this) {
+                $transaction->setTransaction(null);
+            }
+        }
 
         return $this;
     }

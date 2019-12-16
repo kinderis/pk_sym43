@@ -3,8 +3,8 @@
 namespace App\Service;
 
 use App\Entity\Currency;
-use App\Entity\CurrencyInProvider;
 use App\Entity\Transaction;
+use App\Entity\TransactionStatus;
 
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
@@ -31,9 +31,6 @@ class TransactionService
         $this->em = $em;
     }
 
-    /*
-     * @throws NotFoundException
-    */
     public function startTransaction ($user,  Request $request)
     {
         $countTransactionFee = $this->countTransactionFee($user->getId());
@@ -53,62 +50,28 @@ class TransactionService
 
         if ( $countTransaction <= 10 ) {
             $now = new \DateTime();
-            $start = new Transaction();
+            $transactions = new Transaction();
 
-            $start->setUser($user);
-            $start->setCurrency($currency);
-            $start->setAmount( $amountCnt );
-            $start->setReceiverAccount($user->getReceiverAccount());
-            $start->setReceiverName($user->getConcatName());
-            $start->setDetails($request->request->get('details'));
-            $start->setTwoFactorCode( $this->createTwoFactorCode() );
-            $start->setCreatedAt($now);
-            $start->setUpdatedAt($now);
-            $start->setTransactionFee( $countTransactionFee );
-            $start->setTotalAmount( $totalAmountCnt );
+            $transactions->setUser($user);
+            $transactions->setCurrency($currency);
+            $transactions->setAmount( $amountCnt );
+            $transactions->setReceiverAccount($user->getReceiverAccount());
+            $transactions->setReceiverName($user->getConcatName());
+            $transactions->setDetails($request->request->get('details'));
+            $transactions->setTwoFactorCode( $this->createTwoFactorCode() );
+            $transactions->setCreatedAt($now);
+            $transactions->setUpdatedAt($now);
+            $transactions->setTransactionFee( $countTransactionFee );
+            $transactions->setTotalAmount( $totalAmountCnt );
+            $transactions->setStatus($this->em->getRepository(TransactionStatus::class)->findOneByNameField('draft'));
 
-            $this->em->persist($start);
+            $this->em->persist($transactions);
             $this->em->flush();
 
-            return $this->returnResult( $start,'The transaction started');
+            return $this->returnResult( $transactions,'The transaction started');
         } else {
             throw new BadRequestException(['The maximum number of possible transactions per hour has been exceeded'], Response::HTTP_LOCKED);
         }
-    }
-
-    public function authorizeTransaction ($user,  Request $request)
-    {
-        $twoAuthorize = $this->checkAuthorize($request->request->get('code'), $user);
-
-        if ($twoAuthorize){
-
-            $details = $twoAuthorize->getDetails();
-            $currency = $twoAuthorize->getCurrency()->getId();
-            $provider = $this->activateProvider ( $currency, $details );
-
-            if (false === $provider){
-                throw new NotFoundException('No supplier found');
-            }
-
-            $start = $this->em->getRepository(Transaction::class)->find($twoAuthorize->getId());
-
-            $start->setTwoFactorCode(null);
-            $start->setTransactionEnd(1);
-            $start->setProviderResponse($provider);
-            $start->setUpdatedAt(new \DateTime());
-
-            $this->em->flush();
-            return $this->returnResult($start,'completed');
-        } else{
-            throw new NotFoundException('Invalid authorization code');
-        }
-    }
-
-    private function checkAuthorize ($code, $user)
-    {
-        $check = $this->em->getRepository(Transaction::class)->findUserAuthorizeCode($code, $user);
-
-        return ($check) ? $check : false;
     }
 
     private function countTransactionFee ($user_id)
@@ -133,31 +96,6 @@ class TransactionService
     {
         $totalAmountCnt = $this->em->getRepository(Transaction::class)->findTotalAmountFromCurrency($currency, $user);
         return ((($totalAmountCnt + $newTotalAmount)/100) <= self::MAX_CURRENT_SUM) ? true : false;
-    }
-
-    private function activateProvider ($currency, $details)
-    {
-        $currencyInProviders = $this->em->getRepository(CurrencyInProvider::class)->findBy(['Currency' => $currency]);
-
-        $method = [];
-        foreach ( $currencyInProviders as $currencyInProvider){
-            $method[] = $currencyInProvider->getProvider()->getMethod()->getMethod();
-        }
-
-        $method = $method[0];
-
-        switch ( $method ){
-            case 'substrings':
-                $result = substr( $details,0,20);
-                break;
-            case 'appends':
-                $result = $details.' '.rand();
-                break;
-            default:
-                $result = false;
-        }
-
-        return $result;
     }
 
     private function returnResult ($result, $status)

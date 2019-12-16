@@ -54,21 +54,4 @@ class TransactionController extends AbstractController
 
         return new Response($jsonObject, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
-
-    /**
-     * @Route("/api/authorizeTransaction", methods={"POST"})
-     * @return Response
-     */
-
-    public function authorizeTransaction (Request $request)
-    {
-        $token = $this->tokenStorage->getToken();
-        /** @var WebUser $user */
-        $user = $token->getUser();
-
-        $response = $this->transactionService->authorizeTransaction($user, $request);
-
-        $serializedEntity = $this->container->get('serializer')->serialize($response, 'json');
-        return new Response($serializedEntity, Response::HTTP_OK, ['Content-Type' => 'application/json']);
-    }
 }
