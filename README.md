@@ -17,7 +17,7 @@
 ------------
 * ``/auth/tokens``
 * ``/api/createTransaction`` (require authorization)
-* ``/api/createTransaction`` (require authorization)
+* ``/api/approveTwoFactorKey`` (require authorization)
 
 **`Authorization`**
 ------------
